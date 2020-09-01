@@ -489,8 +489,40 @@ public final class ListView : UIView
     }
     
     //
+    // MARK: Measuring Lists
+    //
+    
+    private static let measurementView = ListView()
+    
+    public static func contentSize(in fittingSize : CGSize, for properties : ListProperties.Build) -> CGSize {
+        self.contentSize(in: fittingSize, for: .default(with: properties))
+    }
+    
+    public static func contentSize(in fittingSize : CGSize, for properties : ListProperties) -> CGSize {
+        let view = Self.measurementView
+        
+        view.frame.size = fittingSize
+        view.configure(with: properties)
+        
+        return CGSize(
+            width: min(fittingSize.width, view.contentSize.width),
+            height: min(fittingSize.height, view.contentSize.height)
+        )
+    }
+    
+    //
     // MARK: UIView
     //
+    
+    @available(*, unavailable, message: "")
+    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+        size
+    }
+    
+    @available(*, unavailable, message: "")
+    public override var intrinsicContentSize: CGSize {
+        self.contentSize
+    }
     
     public override var frame: CGRect {
         didSet {

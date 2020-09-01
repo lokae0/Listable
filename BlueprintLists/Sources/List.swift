@@ -41,21 +41,32 @@ import Listable
 ///
 public struct List : Element
 {
-    /// The values which back the on-screen list.
+    /// The properties which back the on-screen list.
+    ///
+    /// When it comes time to render the `List` on screen,
+    /// `ListView.configure(with: properties)` is called
+    /// to update the on-screen list with the provided properties.
     public var properties : ListProperties
     
-    public var measurement : Measurement
+    /// How the `List` is measured when the element is laid out
+    /// by Blueprint.  Defaults to `.fillParent`, which means
+    /// it will take up all the size it is given. You can change this to
+    /// `.measureContent` to instead measure the optimal size.
+    ///
+    /// See the `Sizing` documentation for more.
+    public var sizing : Sizing
     
     //
     // MARK: Initialization
     //
         
-    /// Create a new list, configured with the properties you set on the provided `ListProperties` object.
+    /// Create a new list, configured with the provided properties,
+    /// configured with the provided `ListProperties` builder.
     public init(
-        measurement : Measurement = .maximum,
+        sizing : Sizing = .fillParent,
         build : ListProperties.Build
     ) {
-        self.measurement = measurement
+        self.sizing = sizing
         
         self.properties = .default(with: build)
     }
@@ -63,18 +74,15 @@ public struct List : Element
     //
     // MARK: Element
     //
-    
-    static let measurementView = ListView()
-    
+        
     public var content : ElementContent {
         ElementContent { constraint -> CGSize in
-            switch self.measurement {
-            case .maximum:
+            switch self.sizing {
+            case .fillParent:
                 return constraint.maximum
                 
             case .measureContent:
-                Self.measurementView.configure(with: self.properties)
-                return Self.measurementView.contentSize
+                return ListView.contentSize(in: constraint.maximum, for: self.properties)
             }
         }
     }
@@ -96,8 +104,59 @@ public struct List : Element
 
 public extension List
 {
-    enum Measurement : Equatable {
-        case maximum
+    ///
+    /// Provides the possible options for sizing a `List` when it is measured and laid out by Blueprint.
+    ///
+    /// You have two options: `.fillParent` and `.measureContent`.
+    ///
+    /// When using  `.fillParent`, the full available space will be taken up, regardless
+    /// of the size of the content itself.
+    ///
+    /// When using `.measureContent`, the content will be measured within the provided space
+    /// and that size will be returned as the size of the list element.
+    /// ```
+    /// .fillParent:
+    /// ┌───────────┐
+    /// │┌─────────┐│
+    /// ││         ││
+    /// ││         ││
+    /// ││         ││
+    /// ││         ││
+    /// ││         ││
+    /// │└─────────┘│
+    /// └───────────┘
+    ///
+    /// .measureContent
+    /// ┌───────────┐
+    /// │           │
+    /// │           │
+    /// │┌─────────┐│
+    /// ││         ││
+    /// ││         ││
+    /// ││         ││
+    /// │└─────────┘│
+    /// └───────────┘
+    /// ```
+    ///
+    enum Sizing : Equatable
+    {
+        /// When using  `.fillParent`, the full available space will be taken up, regardless
+        /// of the content size of the list itself.
+        ///
+        /// This is the setting you want to use when your list is being used to fill the content
+        /// of a screen, such as if it is being presented in a navigation controller or tab bar controller.
+        case fillParent
+        
+        /// When using `.measureContent`, the content will be measured within the provided space
+        /// and that size will be returned as the size of the list element.
+        ///
+        /// If you are putting a list into a sheet or popover, this is generally the `Sizing` type
+        /// you will want to use, to ensure the sheet or popover takes up the minimum amount of space possible.
+        ///
+        /// **Note**: This method may return both extremely short sizes (0 pts), or extremely tall
+        /// sizes (1000, 10,000 pt, or more) depending on the full size of your list. When using
+        /// this option, you should usually wrap the `List` in a `ConstrainedSize` to avoid
+        /// overflowing the parent element.
         case measureContent
     }
 }

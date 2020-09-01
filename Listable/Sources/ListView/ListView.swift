@@ -531,12 +531,12 @@ public final class ListView : UIView
     
     @available(*, unavailable, message: "")
     public override func sizeThatFits(_ size: CGSize) -> CGSize {
-        size
+        super.sizeThatFits(size)
     }
     
     @available(*, unavailable, message: "")
     public override var intrinsicContentSize: CGSize {
-        self.contentSize
+        super.intrinsicContentSize
     }
     
     public override var frame: CGRect {

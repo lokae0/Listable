@@ -44,13 +44,19 @@ public struct List : Element
     /// The values which back the on-screen list.
     public var properties : ListProperties
     
+    public var measurement : Measurement
+    
     //
     // MARK: Initialization
     //
         
     /// Create a new list, configured with the properties you set on the provided `ListProperties` object.
-    public init(build : ListProperties.Build)
-    {
+    public init(
+        measurement : Measurement = .maximum,
+        build : ListProperties.Build
+    ) {
+        self.measurement = measurement
+        
         self.properties = .default(with: build)
     }
     
@@ -58,9 +64,18 @@ public struct List : Element
     // MARK: Element
     //
     
+    static let measurementView = ListView()
+    
     public var content : ElementContent {
-        ElementContent { constraint in
-            constraint.maximum
+        ElementContent { constraint -> CGSize in
+            switch self.measurement {
+            case .maximum:
+                return constraint.maximum
+                
+            case .measureContent:
+                Self.measurementView.configure(with: self.properties)
+                return Self.measurementView.contentSize
+            }
         }
     }
     
@@ -78,3 +93,11 @@ public struct List : Element
     }
 }
 
+
+public extension List
+{
+    enum Measurement : Equatable {
+        case maximum
+        case measureContent
+    }
+}

@@ -501,12 +501,27 @@ public final class ListView : UIView
     public static func contentSize(in fittingSize : CGSize, for properties : ListProperties) -> CGSize {
         let view = Self.measurementView
         
+        /// Set the size of the view to the fitting size, since the width or height
+        /// will be used by the underlying layout to measure the required contentSize.
+        
         view.frame.size = fittingSize
+        
+        /// Push the updated content into the list.
+        
         view.configure(with: properties)
         
+        let size = view.contentSize
+        
+        /// Now that we have the the measured contentSize,
+        /// push empty content back into the list, so that no
+        /// callback closures, etc, which may have been assigned
+        /// by the developer, are retained for longer than expected.
+        
+        view.configure(with: .default())
+        
         return CGSize(
-            width: min(fittingSize.width, view.contentSize.width),
-            height: min(fittingSize.height, view.contentSize.height)
+            width: min(fittingSize.width, size.width),
+            height: min(fittingSize.height, size.height)
         )
     }
     

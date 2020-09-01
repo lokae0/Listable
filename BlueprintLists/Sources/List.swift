@@ -154,7 +154,7 @@ public extension List
         /// you will want to use, to ensure the sheet or popover takes up the minimum amount of space possible.
         ///
         /// **Note**: This method may return both extremely short sizes (0 pts), or extremely tall
-        /// sizes (1000, 10,000 pt, or more) depending on the full size of your list. When using
+        /// sizes (1000, 10,000 pt, or more) depending on the content in your list. When using
         /// this option, you should usually wrap the `List` in a `ConstrainedSize` to avoid
         /// overflowing the parent element.
         case measureContent
